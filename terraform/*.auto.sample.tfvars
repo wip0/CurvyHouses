@@ -1,0 +1,6 @@
+domain_name = ""
+certificate_arn = ""
+lambda_basic_execution_role = ""
+aws_region = ""
+aws_lb_subnet_a = ""
+aws_lb_subnet_b = ""
