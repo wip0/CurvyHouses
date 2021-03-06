@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        "**/.terraform": true,
+        "**/.terraform.lock.hcl": true
+    },
+    "search.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/.vscode": true
+    }
+}
