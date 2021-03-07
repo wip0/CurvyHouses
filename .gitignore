@@ -2,3 +2,7 @@
 .terraform.lock.hcl
 .DS_Store
 *.auto.tfvars
+
+
+node_modules
+dist
