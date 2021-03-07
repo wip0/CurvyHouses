@@ -2,7 +2,7 @@ resource "aws_lb" "curvy_alb" {
   name               = "curvyhouses-alb"
   internal           = false
   load_balancer_type = "application"
-  subnets            = [var.aws_lb_subnet_a, var.aws_lb_subnet_b]
+  subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
 }
 
 resource "aws_lb_listener" "http" {

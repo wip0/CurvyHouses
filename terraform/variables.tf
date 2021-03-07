@@ -18,12 +18,8 @@ variable "aws_region" {
   type        = string
 }
 
-variable "aws_lb_subnet_a" {
-  description = "Subnet A for LB"
+variable "aws_profile" {
+  description = "Specify AWS region"
   type        = string
-}
-
-variable "aws_lb_subnet_b" {
-  description = "Subnet B for LB"
-  type        = string
+  default     = "default"
 }
