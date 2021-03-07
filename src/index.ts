@@ -1,5 +1,6 @@
-import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as express from 'express';
+import * as lineService from './line-service';
 const serverless = require('serverless-http');
 
 const app = express();
@@ -14,5 +15,14 @@ app.get('/', function(req, res) {
   };
   res.json(result);
 })
+
+app.post('/webhook/line', async(req, res) => {
+  if (req.body && req.body.events && req.body.events[0] && req.body.events[0].message) {
+    const obj = req.body.events[0];
+    const { replyToken, message } = obj;
+    await lineService.reply(replyToken, message.text);
+  }
+  res.sendStatus(200);
+});
 
 export const handler = serverless(app);

@@ -32,4 +32,9 @@ resource "aws_lambda_function" "curvy_lambda" {
   role             = aws_iam_role.curvy_lambda_role.arn
   runtime          = "nodejs14.x"
   source_code_hash = data.archive_file.curvyhouses_handler.output_base64sha256
+    environment {
+    variables = {
+      LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
+    }
+  }
 }

@@ -23,3 +23,8 @@ variable "aws_profile" {
   type        = string
   default     = "default"
 }
+
+variable "line_channel_access_token" {
+  description = "Line channel access token - get from line developer"
+  type        = string
+}
