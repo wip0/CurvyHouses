@@ -25,7 +25,7 @@ resource "aws_apigatewayv2_api" "curvyhouses_api" {
 }
 
 resource "aws_apigatewayv2_domain_name" "api_domain" {
-  domain_name = "api.curvyhouses.ml"
+  domain_name = "api.${var.domain_name}"
 
   domain_name_configuration {
     certificate_arn = var.certificate_arn
@@ -76,7 +76,7 @@ resource "aws_apigatewayv2_api_mapping" "api_mapping" {
 
 resource "aws_apigatewayv2_route" "route" {
   api_id             = aws_apigatewayv2_api.curvyhouses_api.id
-  route_key          = "ANY /{path+}"
+  route_key          = "POST /webhook/line"
   target             = "integrations/${aws_apigatewayv2_integration.service_integration.id}"
 }
 
@@ -85,7 +85,7 @@ resource "aws_apigatewayv2_integration" "service_integration" {
   integration_type = "AWS_PROXY"
 
   connection_type      = "INTERNET"
-  description          = "{path+} integration"
+  description          = "webhook/line integration"
   integration_method   = "POST"
   integration_uri      = aws_lambda_function.curvy_lambda.invoke_arn
   passthrough_behavior = "WHEN_NO_MATCH"
