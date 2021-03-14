@@ -1,6 +1,8 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import * as dataService from './data-service';
 import * as lineService from './line-service';
+import { LineReqBody } from './line-service';
 const serverless = require('serverless-http');
 
 const app = express();
@@ -16,18 +18,38 @@ app.get('/', function(req, res) {
   res.json(result);
 })
 
-app.post('/webhook/line', async(req, res) => {
-  const reqSignature = req.header('x-line-signature');
-  if (!reqSignature) {
-    console.log('invalid signature');
-    throw new Error('invalid signature');
+app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any, Record<string, any>>, res) => {
+  const body = req.body;
+  lineService.verifySignature(req);
+  if (!lineService.validateLinePayload(body)) {
+    console.log('Invalid payload');
+    throw new Error('Invalid payload');
   }
-  lineService.verifySignature(JSON.stringify(req.body), reqSignature);
-  if (req.body && req.body.events && req.body.events[0] && req.body.events[0].message) {
-    const obj = req.body.events[0];
-    const { replyToken, message } = obj;
-    await lineService.reply(replyToken, message.text);
-  }
+  lineService.logPayloadDebug(body);
+
+  const { events } = body;
+  const processPromises = events.map(async (event) => {
+    const { replyToken, message } = event;
+    const userMessage = message.text;
+    if (!userMessage.startsWith('#')) {
+      console.log('skip non-command message');
+      return;
+    }
+    const [commandWithPrefix, ...params] = userMessage.split(' ');
+    const command = commandWithPrefix.substr(1).toLowerCase();
+    switch (command) {
+      case 'show':
+        const symbol = params[0];
+        const eodResponse = await dataService.getEodData(symbol);
+        const data = eodResponse?.data[0];
+        await lineService.reply(replyToken, `open: ${data.open} | high: ${data.high} | low: ${data.low} | close: ${data.close} | volume: ${data.volume}`);
+        break;
+      default:
+        await lineService.reply(replyToken, 'Invalid command');
+        break;
+    }
+  });
+  await Promise.all(processPromises);
   res.sendStatus(200);
 });
 

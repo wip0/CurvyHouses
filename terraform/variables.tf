@@ -33,3 +33,13 @@ variable "line_channel_secret" {
   description = "Line channel secret - get from line developer"
   type        = string
 }
+
+variable "marketstock_endpoint" {
+  description = "Marketstock endpoint"
+  type        = string
+}
+
+variable "marketstock_api_key" {
+  description = "Marketstock api key"
+  type        = string
+}
