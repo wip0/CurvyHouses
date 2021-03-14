@@ -2,27 +2,15 @@ resource "aws_route53_zone" "curvyhouses" {
   name = var.domain_name
 }
 
-resource "aws_route53_record" "curvyhouses_a_record" {
+resource "aws_route53_record" "example" {
   zone_id = aws_route53_zone.curvyhouses.zone_id
-  name    = "api.${var.domain_name}"
+  name    = aws_apigatewayv2_domain_name.api_domain.domain_name
   type    = "A"
 
   alias {
-    name                   = aws_lb.curvy_alb.dns_name
-    zone_id                = aws_lb.curvy_alb.zone_id
-    evaluate_target_health = true
-  }
-}
-
-resource "aws_route53_record" "curvyhouses_aaaa_record" {
-  zone_id = aws_route53_zone.curvyhouses.zone_id
-  name    = "api.${var.domain_name}"
-  type    = "AAAA"
-
-  alias {
-    name                   = aws_lb.curvy_alb.dns_name
-    zone_id                = aws_lb.curvy_alb.zone_id
-    evaluate_target_health = true
+    name                   = aws_apigatewayv2_domain_name.api_domain.domain_name_configuration[0].target_domain_name
+    zone_id                = aws_apigatewayv2_domain_name.api_domain.domain_name_configuration[0].hosted_zone_id
+    evaluate_target_health = false
   }
 }
 

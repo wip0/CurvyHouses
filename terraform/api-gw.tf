@@ -6,56 +6,93 @@ resource "aws_lambda_permission" "apigw" {
 
    # The "/*/*" portion grants access from any method on any resource
    # within the API Gateway REST API.
-   source_arn = "${aws_api_gateway_rest_api.curvyhouses.execution_arn}/*/*"
+   source_arn = "${aws_apigatewayv2_api.curvyhouses_api.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_rest_api" "curvyhouses" {
-  name = "curvyhouses"
-  description = "-"
+resource "aws_apigatewayv2_api" "curvyhouses_api" {
+  name          = "curvyhouses-http-api"
+  protocol_type = "HTTP"
+  disable_execute_api_endpoint = true
+  
+  cors_configuration {
+    allow_credentials = false
+    allow_headers     = ["*"]
+    allow_methods     = ["*"]
+    allow_origins     = ["*"]
+    expose_headers    = ["*"]
+    max_age           = 3600
+  }
 }
 
-resource "aws_api_gateway_resource" "proxy" {
-  rest_api_id = aws_api_gateway_rest_api.curvyhouses.id
-  parent_id   = aws_api_gateway_rest_api.curvyhouses.root_resource_id
-  path_part   = "hello"
+resource "aws_apigatewayv2_domain_name" "api_domain" {
+  domain_name = "api.curvyhouses.ml"
+
+  domain_name_configuration {
+    certificate_arn = var.certificate_arn
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
 }
 
-resource "aws_api_gateway_method" "proxy" {
-   rest_api_id   = aws_api_gateway_rest_api.curvyhouses.id
-   resource_id   = aws_api_gateway_resource.proxy.id
-   http_method   = "GET"
-   authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "lambda" {
-   rest_api_id = aws_api_gateway_rest_api.curvyhouses.id
-   resource_id = aws_api_gateway_method.proxy.resource_id
-   http_method = aws_api_gateway_method.proxy.http_method
-
-   integration_http_method = "POST"
-   type                    = "AWS_PROXY"
-   uri                     = aws_lambda_function.curvy_lambda.invoke_arn
-}
-
-resource "aws_api_gateway_method_response" "response_200" {
-  rest_api_id = aws_api_gateway_rest_api.curvyhouses.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.proxy.http_method
-  status_code = "200"
+resource "aws_cloudwatch_log_group" "curvyhouses_api_log" {
+  name = "/api/curvyhouses_log"
+  retention_in_days = 30
 }
 
 
-resource "aws_api_gateway_deployment" "curvyhouses" {
-  depends_on = [
-    aws_api_gateway_integration.lambda,
-    # aws_api_gateway_integration.lambda_root,
-  ]
+resource "aws_apigatewayv2_stage" "stage" {
+  api_id      = aws_apigatewayv2_api.curvyhouses_api.id
+  name        = "$default"
+  auto_deploy = true
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.curvyhouses_api_log.arn
+    format = jsonencode(
+      {
+        httpMethod     = "$context.httpMethod"
+        ip             = "$context.identity.sourceIp"
+        protocol       = "$context.protocol"
+        requestId      = "$context.requestId"
+        requestTime    = "$context.requestTime"
+        responseLength = "$context.responseLength"
+        routeKey       = "$context.routeKey"
+        status         = "$context.status"
+      }
+    )
+  }
 
-  rest_api_id = aws_api_gateway_rest_api.curvyhouses.id
+  lifecycle {
+    ignore_changes = [
+      deployment_id,
+      default_route_settings
+    ]
+  }
 }
 
-resource "aws_api_gateway_stage" "dev" {
-  deployment_id = aws_api_gateway_deployment.curvyhouses.id
-  rest_api_id   = aws_api_gateway_rest_api.curvyhouses.id
-  stage_name    = "dev"
+resource "aws_apigatewayv2_api_mapping" "api_mapping" {
+  api_id      = aws_apigatewayv2_api.curvyhouses_api.id
+  domain_name = aws_apigatewayv2_domain_name.api_domain.id
+  stage       = aws_apigatewayv2_stage.stage.id
+}
+
+resource "aws_apigatewayv2_route" "route" {
+  api_id             = aws_apigatewayv2_api.curvyhouses_api.id
+  route_key          = "ANY /{path+}"
+  target             = "integrations/${aws_apigatewayv2_integration.service_integration.id}"
+}
+
+resource "aws_apigatewayv2_integration" "service_integration" {
+  api_id           = aws_apigatewayv2_api.curvyhouses_api.id
+  integration_type = "AWS_PROXY"
+
+  connection_type      = "INTERNET"
+  description          = "{path+} integration"
+  integration_method   = "POST"
+  integration_uri      = aws_lambda_function.curvy_lambda.invoke_arn
+  passthrough_behavior = "WHEN_NO_MATCH"
+
+  lifecycle {
+    ignore_changes = [
+      passthrough_behavior
+    ]
+  }
 }

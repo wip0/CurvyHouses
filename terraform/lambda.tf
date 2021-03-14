@@ -36,6 +36,7 @@ resource "aws_lambda_function" "curvy_lambda" {
     variables = {
       LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
       LINE_CHANNEL_SECRET = var.line_channel_secret
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
     }
   }
 }
