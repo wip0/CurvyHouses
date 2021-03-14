@@ -1,9 +1,11 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
-import * as dataService from './data-service';
-import * as lineService from './line-service';
-import { LineReqBody } from './line-service';
-const serverless = require('serverless-http');
+import * as serverless from 'serverless-http';
+import { LineReqBody } from './interfaces';
+import * as DataService from './services/data.service';
+import * as LineService from './services/line.service';
+import * as MessageUtils from './utils/message.utils';
+import * as Utils from './utils/utils';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,12 +22,12 @@ app.get('/', function(req, res) {
 
 app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any, Record<string, any>>, res) => {
   const body = req.body;
-  lineService.verifySignature(req);
-  if (!lineService.validateLinePayload(body)) {
+  LineService.verifySignature(req);
+  if (!Utils.validateLinePayload(body)) {
     console.log('Invalid payload');
     throw new Error('Invalid payload');
   }
-  lineService.logPayloadDebug(body);
+  Utils.logPayloadDebug(body);
 
   const { events } = body;
   const processPromises = events.map(async (event) => {
@@ -41,13 +43,13 @@ app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any,
       case 'show':
       case 'showfull':
         const symbol = params[0];
-        const eodResponse = await dataService.getEodData(symbol);
+        const eodResponse = await DataService.getEodData(symbol);
         const data = eodResponse?.data[0];
         const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low } = data;
-        await lineService.reply(replyToken, lineService.buildEodFlexMessage(symbol, open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, command === 'showfull'));
+        await LineService.reply(replyToken, MessageUtils.buildEodFlexMessage(symbol, open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, command === 'showfull'));
         break;
       default:
-        await lineService.reply(replyToken, lineService.buildTextMessage('Invalid command'));
+        await LineService.reply(replyToken, MessageUtils.buildTextMessage('Invalid command'));
         break;
     }
   });

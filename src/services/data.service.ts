@@ -1,37 +1,7 @@
 import * as request from 'request';
+import { MarketStock } from '../constant';
+import { EodResponse } from '../interfaces';
 
-const MarketStock = {
-    API_ENDPOINT: process.env.MARKETSTOCK_ENDPOINT as string,
-    API_KEY: process.env.MARKETSTOCK_API_KEY as string,
-};
-
-interface Pagination {
-    limit: number;
-    offset: number;
-    count: number;
-    total: number;
-}
-
-interface EodData {
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
-    adj_high: number;
-    adj_low: number;
-    adj_open: number;
-    adj_close: number;
-    adj_volume: number;
-    symbol: string;
-    exchange: string;
-    date: string;
-}
-
-interface EodResponse {
-    pagination: Pagination;
-    data: EodData[]
-}
 
 export function getEodData(symbols: string) {
     // return retrieveRealData(symbols);
