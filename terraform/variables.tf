@@ -28,3 +28,8 @@ variable "line_channel_access_token" {
   description = "Line channel access token - get from line developer"
   type        = string
 }
+
+variable "line_channel_secret" {
+  description = "Line channel secret - get from line developer"
+  type        = string
+}
