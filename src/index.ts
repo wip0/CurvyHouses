@@ -17,6 +17,12 @@ app.get('/', function(req, res) {
 })
 
 app.post('/webhook/line', async(req, res) => {
+  const reqSignature = req.header('x-line-signature');
+  if (!reqSignature) {
+    console.log('invalid signature');
+    throw new Error('invalid signature');
+  }
+  lineService.verifySignature(JSON.stringify(req.body), reqSignature);
   if (req.body && req.body.events && req.body.events[0] && req.body.events[0].message) {
     const obj = req.body.events[0];
     const { replyToken, message } = obj;
