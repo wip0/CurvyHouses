@@ -42,10 +42,11 @@ app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any,
         const symbol = params[0];
         const eodResponse = await dataService.getEodData(symbol);
         const data = eodResponse?.data[0];
-        await lineService.reply(replyToken, `open: ${data.open} | high: ${data.high} | low: ${data.low} | close: ${data.close} | volume: ${data.volume}`);
+        const { open, close, high, low, volume } = data;
+        await lineService.reply(replyToken, lineService.buildEodFlexMessage(symbol, open, close, high, low, volume));
         break;
       default:
-        await lineService.reply(replyToken, 'Invalid command');
+        await lineService.reply(replyToken, lineService.buildTextMessage('Invalid command'));
         break;
     }
   });

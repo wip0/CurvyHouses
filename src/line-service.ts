@@ -47,17 +47,14 @@ export function logPayloadDebug(body: LineReqBody) {
 }
 
 
-export function reply(replyToken: string, text: string) {
+export function reply(replyToken: string, message: any) {
     let headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${LineChannel.TOKEN}`
     }
     let body = JSON.stringify({
         replyToken: replyToken,
-        messages: [{
-            type: 'text',
-            text
-        }]
+        messages: [message]
     })
     return new Promise<void>((resolve, reject) => {
         request.post({
@@ -72,4 +69,72 @@ export function reply(replyToken: string, text: string) {
             resolve();
         });
     })
+}
+
+export function buildTextMessage(text: string) {
+    return {
+        type: 'text',
+        text
+    };
+}
+
+export function buildEodFlexMessage(symbol: string, open: number, close: number, high: number, low: number, volume: number) {
+    return {
+        type: 'flex',
+        altText: `Show ${symbol}`,
+        contents: {
+            type: 'bubble',
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    {
+                        type: 'text',
+                        text: symbol,
+                        weight: 'bold',
+                        size: 'xl'
+                    },
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            buildEodDataBox('Open', String(open)),
+                            buildEodDataBox('Close', String(close)),
+                            buildEodDataBox('High', String(high)),
+                            buildEodDataBox('Low', String(low)),
+                            buildEodDataBox('Volume', String(volume)),
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
+
+export function buildEodDataBox(key: string, value: string) {
+    return {
+        type: 'box',
+        layout: 'baseline',
+        spacing: 'sm',
+        contents: [
+            {
+                type: 'text',
+                text: key,
+                color: '#aaaaaa',
+                size: 'sm',
+                flex: 1
+            },
+            {
+                type: 'text',
+                text: value,
+                wrap: true,
+                color: '#666666',
+                size: 'sm',
+                flex: 3,
+                align: 'end'
+            }
+        ]
+    }
 }
