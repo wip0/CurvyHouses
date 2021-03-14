@@ -39,11 +39,12 @@ app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any,
     const command = commandWithPrefix.substr(1).toLowerCase();
     switch (command) {
       case 'show':
+      case 'showfull':
         const symbol = params[0];
         const eodResponse = await dataService.getEodData(symbol);
         const data = eodResponse?.data[0];
-        const { open, close, high, low, volume } = data;
-        await lineService.reply(replyToken, lineService.buildEodFlexMessage(symbol, open, close, high, low, volume));
+        const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low } = data;
+        await lineService.reply(replyToken, lineService.buildEodFlexMessage(symbol, open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, command === 'showfull'));
         break;
       default:
         await lineService.reply(replyToken, lineService.buildTextMessage('Invalid command'));

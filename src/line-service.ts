@@ -7,6 +7,11 @@ const LineChannel = {
     SECRET: process.env.LINE_CHANNEL_SECRET as string,
 }
 
+const GREEN_COLOR = '#00bf33';
+const RED_COLOR = '#dd0000';
+const GREY_COLOR = '#666666';
+const FIX_DECIMAL_PLACE = 2;
+
 export interface LineReqEvent {
     message: {
         text: string;
@@ -78,7 +83,32 @@ export function buildTextMessage(text: string) {
     };
 }
 
-export function buildEodFlexMessage(symbol: string, open: number, close: number, high: number, low: number, volume: number) {
+export function buildSeperator() {
+    return {
+      type: 'separator',
+      margin: 'xl'
+    };
+}
+
+export function buildEodFlexMessage(symbol: string, open: number, close: number, high: number, low: number, volume: number, adjOpen: number, adjClose: number, adjHigh: number, adjLow: number, fullDetail: boolean = false) {
+    const change = close - open;
+    const changePercentage = numberWithCommas(change / open * 100);
+    const sumColor = change > 0 ? GREEN_COLOR : change < 0 ? RED_COLOR : GREY_COLOR;
+
+    const defaultData: any[] = [
+        buildEodDataBox('Open', numberWithCommas(open)),
+        buildEodDataBox('Close', numberWithCommas(close)),
+        buildEodDataBox('High', numberWithCommas(high), GREEN_COLOR),
+        buildEodDataBox('Low', numberWithCommas(low), RED_COLOR),
+    ];
+
+    const adjustData: any[] = [
+        buildEodDataBox('Adj.Open', numberWithCommas(adjOpen)),
+        buildEodDataBox('Adj.Close', numberWithCommas(adjClose)),
+        buildEodDataBox('Adj.High', numberWithCommas(adjHigh), GREEN_COLOR),
+        buildEodDataBox('Adj.Low', numberWithCommas(adjLow), RED_COLOR),
+    ];
+
     return {
         type: 'flex',
         altText: `Show ${symbol}`,
@@ -92,28 +122,53 @@ export function buildEodFlexMessage(symbol: string, open: number, close: number,
                         type: 'text',
                         text: symbol,
                         weight: 'bold',
-                        size: 'xl'
+                        size: 'md',
+                        margin: 'md',
                     },
+                    {
+                      type: 'text',
+                      text: String(close),
+                      size: 'xxl',
+                      weight: 'bold',
+                      color: sumColor,
+                    },
+                    {
+                      type: 'text',
+                      text: `(${changePercentage}%)`,
+                      size: 'xxs',
+                      color: sumColor,
+                    },
+                    {
+                      type: 'text',
+                      text: `Volume ${numberWithCommas(volume, 0)}`,
+                      size: 'xxs',
+                      color: GREY_COLOR,
+                    },
+                    buildSeperator(),
                     {
                         type: 'box',
                         layout: 'vertical',
                         margin: 'lg',
                         spacing: 'sm',
-                        contents: [
-                            buildEodDataBox('Open', String(open)),
-                            buildEodDataBox('Close', String(close)),
-                            buildEodDataBox('High', String(high)),
-                            buildEodDataBox('Low', String(low)),
-                            buildEodDataBox('Volume', String(volume)),
-                        ]
-                    }
+                        contents: defaultData,
+                    },
+                    ...fullDetail ? [
+                        buildSeperator(),
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            margin: 'lg',
+                            spacing: 'sm',
+                            contents: adjustData,
+                        },
+                    ] : [],
                 ]
             }
         }
     }
 }
 
-export function buildEodDataBox(key: string, value: string) {
+export function buildEodDataBox(key: string, value: string, color?: string) {
     return {
         type: 'box',
         layout: 'baseline',
@@ -124,17 +179,22 @@ export function buildEodDataBox(key: string, value: string) {
                 text: key,
                 color: '#aaaaaa',
                 size: 'sm',
-                flex: 1
+                flex: 1,
             },
             {
                 type: 'text',
                 text: value,
                 wrap: true,
-                color: '#666666',
+                color: color ?? '#666666',
                 size: 'sm',
                 flex: 3,
-                align: 'end'
+                align: 'end',
+                weight: 'bold',
             }
         ]
     }
+}
+
+function numberWithCommas(num: number, fixDecimal: number = FIX_DECIMAL_PLACE) {
+    return num.toFixed(fixDecimal).replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }

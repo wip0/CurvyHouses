@@ -84,20 +84,20 @@ export async function retrieveMockData(symbols: string): Promise<EodResponse> {
         },
         data: [
             {
-                open: 119.03,
-                high: 122.06,
-                low: 118.79,
-                close: 121.085,
-                volume: 129525080.0,
-                adj_high: 122.06,
-                adj_low: 118.79,
-                adj_close: 121.085,
-                adj_open: 119.03,
-                adj_volume: 129525780.0,
-                symbol: symbols,
-                exchange: "XNAS",
-                date: "2021-03-09T00:00:00+0000"
-            }
+                date: '2019-02-01T00:00:00+0000',
+                symbol: 'AAPL',
+                exchange: 'XNAS',
+                open: 166.96,
+                high: 168.98,
+                low: 165.93,
+                close: 166.52,
+                volume: 32668138.0,
+                adj_open: 164.0861621594,
+                adj_high: 166.0713924395,
+                adj_low: 163.073891274,
+                adj_close: 163.6537357617,
+                adj_volume: 32668138.0
+            },
         ]
     }
 }
