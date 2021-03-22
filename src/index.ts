@@ -6,6 +6,8 @@ import * as DataService from './services/data.service';
 import * as LineService from './services/line.service';
 import * as MessageUtils from './utils/message.utils';
 import * as Utils from './utils/utils';
+const { ma } = require('moving-averages');
+const MA_DEFAULT_BAR = 5;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -44,9 +46,12 @@ app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any,
       case 'showfull':
         const symbol = params[0];
         const eodResponse = await DataService.getEodData(symbol);
-        const data = eodResponse?.data[0];
-        const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low } = data;
-        await LineService.reply(replyToken, MessageUtils.buildEodFlexMessage(symbol, open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, command === 'showfull'));
+        const data = eodResponse.data.sort((eod1, eod2) => new Date(eod1.date).getTime() > new Date(eod2.date).getTime() ? 1 : -1);
+        data.splice(0, data.length - MA_DEFAULT_BAR);
+        const closeMas = ma(data.map(item => item.close), MA_DEFAULT_BAR);
+        const closeMa = closeMas[closeMas.length - 1];
+        const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, date } = data[data.length - 1];
+        await LineService.reply(replyToken, MessageUtils.buildEodFlexMessage(symbol, new Date(date), open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, closeMa, command === 'showfull'));
         break;
       default:
         await LineService.reply(replyToken, MessageUtils.buildTextMessage('Invalid command'));

@@ -29,7 +29,21 @@ export function buildEodRowBox(key: string, value: string, color?: string) {
     }
 }
 
-export function buildEodFlexMessage(symbol: string, open: number, close: number, high: number, low: number, volume: number, adjOpen: number, adjClose: number, adjHigh: number, adjLow: number, fullDetail: boolean = false) {
+export function buildEodFlexMessage(
+    symbol: string,
+    date: Date,
+    open: number, 
+    close: number, 
+    high: number, 
+    low: number, 
+    volume: number, 
+    adjOpen: number, 
+    adjClose: number, 
+    adjHigh: number, 
+    adjLow: number, 
+    ma?: number,
+    fullDetail: boolean = false
+) {
     const change = close - open;
     const changePercentage = Utils.numberWithCommas(change / open * 100);
     const sumColor = change > 0 ? Constant.Color.GREEN : change < 0 ? Constant.Color.RED : Constant.Color.GREY;
@@ -63,6 +77,20 @@ export function buildEodFlexMessage(symbol: string, open: number, close: number,
                     buildEodRowBox('Adj.Close', Utils.numberWithCommas(adjClose)),
                     buildEodRowBox('Adj.High', Utils.numberWithCommas(adjHigh), Constant.Color.GREEN),
                     buildEodRowBox('Adj.Low', Utils.numberWithCommas(adjLow), Constant.Color.RED),
+                ],
+            },
+        ] :
+        [];
+    const maPart = ma ? 
+        [
+            buildSeperator(),
+            {
+                type: 'box',
+                layout: 'vertical',
+                margin: 'lg',
+                spacing: 'sm',
+                contents: [
+                    buildEodRowBox('MA5', Utils.numberWithCommas(ma)),
                 ],
             },
         ] :
@@ -105,6 +133,23 @@ export function buildEodFlexMessage(symbol: string, open: number, close: number,
                     },
                     ...defaultContentPart,
                     ...adjustContentPart,
+                    ...maPart,
+                    buildSeperator(),
+                    {
+                        type: 'box',
+                        layout: 'vertical',
+                        margin: 'lg',
+                        spacing: 'sm',
+                        contents: [
+                            {
+                                type: 'text',
+                                text: Utils.toReadableDate(date),
+                                size: 'xxs',
+                                color: Constant.Color.GREY,
+                                align: 'end',
+                            }
+                        ],
+                    },
                 ]
             }
         }
