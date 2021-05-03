@@ -47,7 +47,7 @@ async function processsMessageEvent(event: MessageEvent): Promise<void> {
         await client.replyMessage(replyToken, MessageUtils.buildTextMessage('Invalid command'));
         return;
     }
-    actionHandler(action, params, replyToken);
+    await actionHandler(action, params, replyToken);
 }
 
 function getActionPayload(message: string): { action: string, params: any[] } {

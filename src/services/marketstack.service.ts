@@ -8,7 +8,6 @@ export function getEodData(symbols: string) {
         return retrieveMockData();
     }
     return new Promise<EodResponse>((resolve, reject) => {
-        console.log(MarketStack);
         request.get({
             url: `${MarketStack.API_ENDPOINT}/v1/eod`,
             qs: {
