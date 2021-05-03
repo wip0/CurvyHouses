@@ -34,12 +34,17 @@ variable "line_channel_secret" {
   type        = string
 }
 
-variable "marketstock_endpoint" {
-  description = "Marketstock endpoint"
+variable "marketstack_endpoint" {
+  description = "Marketstack endpoint"
   type        = string
 }
 
-variable "marketstock_api_key" {
-  description = "Marketstock api key"
+variable "marketstack_api_key" {
+  description = "Marketstack api key"
   type        = string
+}
+
+variable "marketstack_enable" {
+  description = "Enable to use marketstack"
+  type = bool
 }

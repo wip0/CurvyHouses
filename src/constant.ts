@@ -17,7 +17,8 @@ export const LineConfiguration = {
     channelSecret: LineChannel.SECRET,
 };
 
-export const MarketStock = {
-    API_ENDPOINT: process.env.MARKETSTOCK_ENDPOINT as string,
-    API_KEY: process.env.MARKETSTOCK_API_KEY as string,
+export const MarketStack = {
+    API_ENDPOINT: process.env.MARKETSTACK_ENDPOINT as string,
+    API_KEY: process.env.MARKETSTACK_API_KEY as string,
+    ENABLE: process.env.MARKETSTACK_ENABLE === 'true'
 };
