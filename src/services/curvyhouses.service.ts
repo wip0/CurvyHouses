@@ -1,9 +1,10 @@
-import { WebhookEvent } from '@line/bot-sdk';
+import { Client, WebhookEvent } from '@line/bot-sdk';
+import { LineConfiguration } from '../constant';
 import * as LineUtils from '../utils/line.utils';
 import * as MessageUtils from '../utils/message.utils';
-import * as LineService from './line.service';
 import * as MarketstackService from './marketstack.service';
 
+const client = new Client(LineConfiguration);
 const { ma } = require('moving-averages');
 const MA_DEFAULT_BAR = 5;
 
@@ -26,7 +27,7 @@ export async function processEvent(event: WebhookEvent): Promise<void> {
     const actionHandler = actionMap.get(action);
     if (!actionHandler) {
         console.log('Invalid command');
-        await LineService.reply(replyToken, MessageUtils.buildTextMessage('Invalid command'));
+        await client.replyMessage(replyToken, MessageUtils.buildTextMessage('Invalid command'));
         return;
     }
     actionHandler(action, params, replyToken);
@@ -54,5 +55,6 @@ async function replySymbolDataHandler(command: string, params: any[], replyToken
     const closeMas = ma(data.map(item => item.close), MA_DEFAULT_BAR);
     const closeMa = closeMas[closeMas.length - 1];
     const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, date } = data[data.length - 1];
-    await LineService.reply(replyToken, MessageUtils.buildEodFlexMessage(symbol, new Date(date), open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, closeMa, command === 'showfull'));
+    const replyMessage = MessageUtils.buildEodFlexMessage(symbol, new Date(date), open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, closeMa, command === 'showfull');
+    await client.replyMessage(replyToken, replyMessage);
 }

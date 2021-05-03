@@ -1,8 +1,9 @@
+import { FlexBox, FlexMessage, FlexSeparator, TextMessage } from '@line/bot-sdk';
 import { Constant } from '../constant';
 import { SeperatorMargin } from '../interfaces';
 import * as Utils from './utils';
 
-export function buildEodRowBox(key: string, value: string, color?: string) {
+export function buildEodRowBox(key: string, value: string, color?: string): FlexBox {
     return {
         type: 'box',
         layout: 'baseline',
@@ -32,18 +33,18 @@ export function buildEodRowBox(key: string, value: string, color?: string) {
 export function buildEodFlexMessage(
     symbol: string,
     date: Date,
-    open: number, 
-    close: number, 
-    high: number, 
-    low: number, 
-    volume: number, 
-    adjOpen: number, 
-    adjClose: number, 
-    adjHigh: number, 
-    adjLow: number, 
+    open: number,
+    close: number,
+    high: number,
+    low: number,
+    volume: number,
+    adjOpen: number,
+    adjClose: number,
+    adjHigh: number,
+    adjLow: number,
     ma?: number,
     fullDetail: boolean = false
-) {
+): FlexMessage {
     const change = close - open;
     const changePercentage = Utils.numberWithCommas(change / open * 100);
     const sumColor = change > 0 ? Constant.Color.GREEN : change < 0 ? Constant.Color.RED : Constant.Color.GREY;
@@ -61,10 +62,10 @@ export function buildEodFlexMessage(
                 buildEodRowBox('High', Utils.numberWithCommas(high), Constant.Color.GREEN),
                 buildEodRowBox('Low', Utils.numberWithCommas(low), Constant.Color.RED),
             ],
-        },
+        } as FlexBox,
     ];
 
-    const adjustContentPart = fullDetail ? 
+    const adjustContentPart = fullDetail ?
         [
             buildSeperator(),
             {
@@ -78,10 +79,10 @@ export function buildEodFlexMessage(
                     buildEodRowBox('Adj.High', Utils.numberWithCommas(adjHigh), Constant.Color.GREEN),
                     buildEodRowBox('Adj.Low', Utils.numberWithCommas(adjLow), Constant.Color.RED),
                 ],
-            },
+            } as FlexBox,
         ] :
         [];
-    const maPart = ma ? 
+    const maPart = ma ?
         [
             buildSeperator(),
             {
@@ -92,7 +93,7 @@ export function buildEodFlexMessage(
                 contents: [
                     buildEodRowBox('MA5', Utils.numberWithCommas(ma)),
                 ],
-            },
+            } as FlexBox,
         ] :
         [];
 
@@ -156,14 +157,14 @@ export function buildEodFlexMessage(
     }
 }
 
-export function buildSeperator(margin: SeperatorMargin = 'xl') {
+export function buildSeperator(margin: SeperatorMargin = 'xl'): FlexSeparator {
     return {
       type: 'separator',
       margin
     };
 }
 
-export function buildTextMessage(text: string) {
+export function buildTextMessage(text: string): TextMessage {
     return {
         type: 'text',
         text

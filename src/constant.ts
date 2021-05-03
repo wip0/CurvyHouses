@@ -5,12 +5,17 @@ export const Constant = {
         GREY: '#666666',
     },
     FIX_DECIMAL_PLACE: 2,
-}
+};
 
 export const LineChannel = {
     TOKEN: process.env.LINE_CHANNEL_ACCESS_TOKEN as string,
     SECRET: process.env.LINE_CHANNEL_SECRET as string,
-}
+};
+
+export const LineConfiguration = {
+    channelAccessToken: LineChannel.TOKEN,
+    channelSecret: LineChannel.SECRET,
+};
 
 export const MarketStock = {
     API_ENDPOINT: process.env.MARKETSTOCK_ENDPOINT as string,
