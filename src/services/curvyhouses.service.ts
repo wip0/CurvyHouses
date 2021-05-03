@@ -1,8 +1,12 @@
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { DynamoDBClient, PutItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { Client, FollowEvent, MessageEvent, UnfollowEvent, WebhookEvent } from '@line/bot-sdk';
 import { LineConfiguration } from '../constant';
 import * as LineUtils from '../utils/line.utils';
 import * as MessageUtils from '../utils/message.utils';
 import * as MarketstackService from './marketstack.service';
+
+const ddbClient = new DynamoDBClient({});
 
 const client = new Client(LineConfiguration);
 const { ma } = require('moving-averages');
@@ -27,11 +31,56 @@ export async function processEvent(event: WebhookEvent): Promise<void> {
 }
 
 async function processFollowEvent(event: FollowEvent): Promise<void> {
-    // TODO: handle follow event
+    const { source } = event;
+    const { type, userId } = source;
+    if (type !== 'user' || !userId) {
+        console.log('Skip non-user following');
+        return;
+    }
+    const userProfile = await client.getProfile(userId);
+    const { displayName } = userProfile;
+    const item = {
+        pk: userId,
+        sk: `user:${userId}`,
+        displayName,
+        isFollow: true,
+    };
+    const params = {
+        TableName: process.env.CURVYHOUSES_TABLE,
+        Item: marshall(item),
+    };
+    const data = await ddbClient.send(new PutItemCommand(params));
+    console.log('follow event - update data', JSON.stringify(data, null, 2));
 }
 
 async function processUnfollowEvent(event: UnfollowEvent): Promise<void> {
-    // TODO: handle unfollow event
+    const { source } = event;
+    const { type, userId } = source;
+    if (type !== 'user' || !userId) {
+        console.log('Skip non-user unfollowing');
+        return;
+    }
+    const getItemParams = {
+        TableName: process.env.CURVYHOUSES_TABLE,
+    }
+    const key = {
+        pk: userId,
+        sk: `user:${userId}`,
+    };
+    const expressionAttributeValues = {
+        ':isFollow': false,
+    }
+    const updateItemParams = {
+        TableName: process.env.CURVYHOUSES_TABLE,
+        Key: marshall(key),
+        UpdateExpression: 'SET #isFollow = :isFollow',
+        ExpressionAttributeNames: {
+            '#isFollow': 'isFollow'
+        },
+        ExpressionAttributeValues: marshall(expressionAttributeValues),
+    };
+    const data = await ddbClient.send(new UpdateItemCommand(updateItemParams));
+    console.log('unfollow event - update data', JSON.stringify(data, null, 2));
 }
 
 async function processsMessageEvent(event: MessageEvent): Promise<void> {

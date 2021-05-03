@@ -13,7 +13,7 @@ resource "aws_apigatewayv2_api" "curvyhouses_api" {
   name          = "curvyhouses-http-api"
   protocol_type = "HTTP"
   disable_execute_api_endpoint = true
-  
+
   cors_configuration {
     allow_credentials = false
     allow_headers     = ["*"]
@@ -21,6 +21,10 @@ resource "aws_apigatewayv2_api" "curvyhouses_api" {
     allow_origins     = ["*"]
     expose_headers    = ["*"]
     max_age           = 3600
+  }
+
+  tags = {
+    Name = var.stack_tag_name
   }
 }
 

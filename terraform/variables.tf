@@ -1,3 +1,9 @@
+variable "stack_tag_name" {
+  description = "Tag for each resource under this stack"
+  type        = string
+  default     = "curvyhouses"
+}
+
 variable "domain_name" {
   description = "Domain name"
   type        = string
@@ -5,11 +11,6 @@ variable "domain_name" {
 
 variable "certificate_arn" {
   description = "ARN of ACM certificate"
-  type        = string
-}
-
-variable "lambda_basic_execution_role" {
-  description = "ARN of lambda execution role"
   type        = string
 }
 

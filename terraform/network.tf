@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
   instance_tenancy = "default"
   tags = {
-    Name = "curvyhouses"
+    Name = var.stack_tag_name
   }
 }
 
@@ -14,7 +14,7 @@ resource "aws_subnet" "public_1" {
   map_public_ip_on_launch = true
   availability_zone = "us-east-1a"
   tags = {
-    Name = "curvyhouses"
+    Name = var.stack_tag_name
   }
 }
 
@@ -24,23 +24,23 @@ resource "aws_subnet" "public_2" {
   map_public_ip_on_launch = true
   availability_zone = "us-east-1b"
   tags = {
-    Name = "curvyhouses"
+    Name = var.stack_tag_name
   }
 }
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "curvyhouses"
+    Name = var.stack_tag_name
   }
 }
 resource "aws_default_route_table" "crt" {
   default_route_table_id = aws_vpc.main.default_route_table_id
   route {
-    cidr_block = "0.0.0.0/0" 
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
   tags = {
-    Name = "curvyhouses"
+    Name = var.stack_tag_name
   }
 }
 
