@@ -1,17 +1,24 @@
+import { JSONParseError, SignatureValidationFailed } from '@line/bot-sdk';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import { NextFunction, Request, Response } from 'express';
 import * as serverless from 'serverless-http';
 import { LineReqBody } from './interfaces';
+import { bodylogMiddleware } from './middlewares/line-bodylog';
+import { signatureValidationMiddleware } from './middlewares/line-signature-validation';
 import * as DataService from './services/data.service';
 import * as LineService from './services/line.service';
 import * as MessageUtils from './utils/message.utils';
-import * as Utils from './utils/utils';
+
 const { ma } = require('moving-averages');
+
 const MA_DEFAULT_BAR = 5;
 
 const app = express();
+app.use('/webhook/line', signatureValidationMiddleware); // this middleware should apply first
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use('/webhook/line', bodylogMiddleware); // this middleware should apply after body parse
 
 app.get('/', function(req, res) {
   const result = {
@@ -22,14 +29,8 @@ app.get('/', function(req, res) {
   res.json(result);
 })
 
-app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any, Record<string, any>>, res) => {
+app.post('/webhook/line', async(req: Request<any, any, LineReqBody, any, Record<string, any>>, res) => {
   const body = req.body;
-  LineService.verifySignature(req);
-  if (!Utils.validateLinePayload(body)) {
-    console.log('Invalid payload');
-    throw new Error('Invalid payload');
-  }
-  Utils.logPayloadDebug(body);
 
   const { events } = body;
   const processPromises = events.map(async (event) => {
@@ -60,6 +61,19 @@ app.post('/webhook/line', async(req: express.Request<any, any, LineReqBody, any,
   });
   await Promise.all(processPromises);
   res.sendStatus(200);
+});
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof SignatureValidationFailed) {
+    console.log('Unauthorized line webhook');
+    res.status(401).send(err.signature);
+    return;
+  } else if (err instanceof JSONParseError) {
+    console.log('Error on parsing with line webhook');
+    res.status(400).send(err.raw);
+    return;
+  }
+  next(err);
 });
 
 export const handler = serverless(app);
