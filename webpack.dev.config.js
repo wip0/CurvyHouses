@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-  mode: "production",
-  entry: path.resolve(__dirname, './src/index.ts'),
+  mode: 'development',
+  entry: path.resolve(__dirname, './src/local-index.ts'),
   module: {
     rules: [
       {
