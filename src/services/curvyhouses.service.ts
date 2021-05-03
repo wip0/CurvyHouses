@@ -1,4 +1,4 @@
-import { Client, WebhookEvent } from '@line/bot-sdk';
+import { Client, FollowEvent, MessageEvent, UnfollowEvent, WebhookEvent } from '@line/bot-sdk';
 import { LineConfiguration } from '../constant';
 import * as LineUtils from '../utils/line.utils';
 import * as MessageUtils from '../utils/message.utils';
@@ -15,9 +15,26 @@ actionMap.set('-', logNonCommandHandler);
 
 
 export async function processEvent(event: WebhookEvent): Promise<void> {
-    if (!LineUtils.isMessageEvent(event)) {
-        return;
+    if (LineUtils.isMessageEvent(event)) {
+        return processsMessageEvent(event);
     }
+    if (LineUtils.isFollowEvent(event)) {
+        return processFollowEvent(event);
+    }
+    if (LineUtils.isUnfollowEvent(event)) {
+        return processUnfollowEvent(event);
+    }
+}
+
+async function processFollowEvent(event: FollowEvent): Promise<void> {
+    // TODO: handle follow event
+}
+
+async function processUnfollowEvent(event: UnfollowEvent): Promise<void> {
+    // TODO: handle unfollow event
+}
+
+async function processsMessageEvent(event: MessageEvent): Promise<void> {
     const { replyToken, message } = event;
     if (!LineUtils.isTextEventMessage(message)) {
         return;
