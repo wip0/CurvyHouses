@@ -28,6 +28,8 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.14.0",
+    "@aws-sdk/util-dynamodb": "^3.14.0",
     "@line/bot-sdk": "^7.3.0",
     "body-parser": "^1.19.0",
     "crypto": "^1.0.1",
