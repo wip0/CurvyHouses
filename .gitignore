@@ -1,7 +1,7 @@
 .terraform
 .terraform.lock.hcl
 .DS_Store
-*.auto.tfvars
+cloud.auto.tfvars
 terraform/functions
 
 node_modules
