@@ -14,6 +14,11 @@ variable "certificate_arn" {
   type        = string
 }
 
+variable "lambda_basic_execution_role" {
+  description = "ARN of lambda basic execution role"
+  type        = string
+}
+
 variable "aws_region" {
   description = "Specify AWS region"
   type        = string

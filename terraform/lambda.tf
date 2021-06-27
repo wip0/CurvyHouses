@@ -32,7 +32,7 @@ resource "aws_iam_role" "curvyhouses_lambda_role" {
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution_policy" {
   role       = aws_iam_role.curvyhouses_lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  policy_arn = var.lambda_basic_execution_role
 }
 
 data "archive_file" "curvyhouses_handler" {
