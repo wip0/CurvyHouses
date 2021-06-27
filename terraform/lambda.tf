@@ -37,7 +37,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution_policy" {
 
 data "archive_file" "curvyhouses_handler" {
     type        = "zip"
-    source_dir  = "functions"
+    source_dir  = "functions/line-web-hook"
     output_path = "curvyhouses_handler.zip"
 }
 
