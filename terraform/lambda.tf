@@ -77,6 +77,7 @@ resource "aws_lambda_function" "curvy_lambda_snp500_daily_run" {
   handler           = "index.handler"
   role             = aws_iam_role.curvyhouses_lambda_role.arn
   runtime           = "nodejs14.x" # need to review
+  timeout           = 30
   source_code_hash = data.archive_file.curvyhouses_snp500_daily_run_handler.output_base64sha256
   
   environment {
