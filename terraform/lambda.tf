@@ -38,16 +38,17 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution_policy" {
 data "archive_file" "curvyhouses_line_hook_handler" {
     type        = "zip"
     source_dir  = "functions/line-web-hook"
-    output_path = "curvyhouses_handler.zip"
+    output_path = "line_hook.zip"
 }
 
 resource "aws_lambda_function" "curvy_lambda_line_hook" {
+  filename         = "line_hook.zip"
   function_name    = "curvy_lambda_line_hook"
   handler          = "index.handler"
   role             = aws_iam_role.curvyhouses_lambda_role.arn
   runtime          = "nodejs14.x"
-  source_code_hash = data.archive_file.curvyhouses_handler.output_base64sha256
-    environment {
+  source_code_hash = data.archive_file.curvyhouses_line_hook_handler.output_base64sha256
+  environment {
     variables = {
       LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
       LINE_CHANNEL_SECRET = var.line_channel_secret
@@ -62,4 +63,43 @@ resource "aws_lambda_function" "curvy_lambda_line_hook" {
   tags = {
     Name = var.stack_tag_name
   }
+}
+
+data "archive_file" "curvyhouses_snp500_daily_run_handler" {
+    type        = "zip"
+    source_dir  = "functions/snp500"
+    output_path = "snp500_daily_run.zip"
+}
+
+resource "aws_lambda_function" "curvy_lambda_snp500_daily_run" {
+  filename          = "snp500_daily_run.zip"
+  function_name     = "curvy_lambda_snp500_daily_run"
+  handler           = "index.handler"
+  role             = aws_iam_role.curvyhouses_lambda_role.arn
+  runtime           = "nodejs14.x" # need to review
+  source_code_hash = data.archive_file.curvyhouses_snp500_daily_run_handler.output_base64sha256
+  
+  environment {
+    variables = {
+      LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
+      LINE_CHANNEL_SECRET = var.line_channel_secret
+      MARKETSTACK_API_KEY = var.marketstack_api_key
+      MARKETSTACK_ENDPOINT = var.marketstack_endpoint
+      MARKETSTACK_ENABLE = var.marketstack_enable
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
+      CURVYHOUSES_TABLE = aws_dynamodb_table.curvyhouses_ddb.name
+    }
+  }
+
+  tags = {
+    Name = var.stack_tag_name
+  }
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_to_call" {
+    statement_id = "AllowExecutionFromCloudWatch"
+    action = "lambda:InvokeFunction"
+    function_name = aws_lambda_function.curvy_lambda_snp500_daily_run.function_name
+    principal = "events.amazonaws.com"
+    source_arn = aws_cloudwatch_event_rule.daily_cron.arn
 }
