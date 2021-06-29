@@ -26,14 +26,14 @@ const handlers = [
       libraryTarget: 'commonjs'
     },
   },
-  // {
-  //   entry: path.resolve(__dirname, './src/snp500/index.ts'),
-  //   output: {
-  //     filename: 'index.js',
-  //     path: path.resolve(__dirname, 'terraform/functions/'),
-  //     libraryTarget: 'commonjs'
-  //   },
-  // }
+  {
+    entry: path.resolve(__dirname, './src/snp500/index.ts'),
+    output: {
+      filename: 'index.js',
+      path: path.resolve(__dirname, 'terraform/functions/snp500'),
+      libraryTarget: 'commonjs'
+    },
+  }
 ]
 
 module.exports = handlers.map((handler) => Object.assign({}, commonConfig, handler));
