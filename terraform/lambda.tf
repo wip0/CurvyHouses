@@ -35,15 +35,14 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution_policy" {
   policy_arn = var.lambda_basic_execution_role
 }
 
-data "archive_file" "curvyhouses_handler" {
+data "archive_file" "curvyhouses_line_hook_handler" {
     type        = "zip"
     source_dir  = "functions/line-web-hook"
     output_path = "curvyhouses_handler.zip"
 }
 
-resource "aws_lambda_function" "curvy_lambda" {
-  filename = "curvyhouses_handler.zip"
-  function_name    = "curvy_lambda"
+resource "aws_lambda_function" "curvy_lambda_line_hook" {
+  function_name    = "curvy_lambda_line_hook"
   handler          = "index.handler"
   role             = aws_iam_role.curvyhouses_lambda_role.arn
   runtime          = "nodejs14.x"

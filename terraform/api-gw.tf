@@ -1,7 +1,7 @@
 resource "aws_lambda_permission" "apigw" {
    statement_id  = "AllowAPIGatewayInvoke"
    action        = "lambda:InvokeFunction"
-   function_name = aws_lambda_function.curvy_lambda.function_name
+   function_name = aws_lambda_function.curvy_lambda_line_hook.function_name
    principal     = "apigateway.amazonaws.com"
 
    # The "/*/*" portion grants access from any method on any resource
@@ -91,7 +91,7 @@ resource "aws_apigatewayv2_integration" "service_integration" {
   connection_type      = "INTERNET"
   description          = "webhook/line integration"
   integration_method   = "POST"
-  integration_uri      = aws_lambda_function.curvy_lambda.invoke_arn
+  integration_uri      = aws_lambda_function.curvy_lambda_line_hook.invoke_arn
   passthrough_behavior = "WHEN_NO_MATCH"
 
   lifecycle {
