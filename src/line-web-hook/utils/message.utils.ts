@@ -38,10 +38,10 @@ export function buildEodFlexMessage(
     high: number,
     low: number,
     volume: number,
-    adjOpen: number,
-    adjClose: number,
-    adjHigh: number,
-    adjLow: number,
+    adjOpen?: number | null,
+    adjClose?: number | null,
+    adjHigh?: number | null,
+    adjLow?: number | null,
     ma?: number,
     fullDetail: boolean = false
 ): FlexMessage {
@@ -74,10 +74,10 @@ export function buildEodFlexMessage(
                 margin: 'lg',
                 spacing: 'sm',
                 contents: [
-                    buildEodRowBox('Adj.Open', Utils.numberWithCommas(adjOpen)),
-                    buildEodRowBox('Adj.Close', Utils.numberWithCommas(adjClose)),
-                    buildEodRowBox('Adj.High', Utils.numberWithCommas(adjHigh), Constant.Color.GREEN),
-                    buildEodRowBox('Adj.Low', Utils.numberWithCommas(adjLow), Constant.Color.RED),
+                    buildEodRowBox('Adj.Open', adjOpen ? Utils.numberWithCommas(adjOpen) : '-'),
+                    buildEodRowBox('Adj.Close', adjClose ? Utils.numberWithCommas(adjClose) : '-'),
+                    buildEodRowBox('Adj.High', adjHigh ? Utils.numberWithCommas(adjHigh) : '-', Constant.Color.GREEN),
+                    buildEodRowBox('Adj.Low', adjLow ? Utils.numberWithCommas(adjLow) : '-', Constant.Color.RED),
                 ],
             } as FlexBox,
         ] :

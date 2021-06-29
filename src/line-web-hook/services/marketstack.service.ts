@@ -3,8 +3,9 @@ import { MarketStack } from '../constant';
 import { EodResponse } from '../interfaces';
 import { retrieveMockData } from '../utils/mock.utils';
 
-export function getEodData(symbols: string) {
+export function getEodData(symbols: string, limit?: number) {
     if (!MarketStack.ENABLE) {
+        console.log('disable market stack api');
         return retrieveMockData();
     }
     return new Promise<EodResponse>((resolve, reject) => {
@@ -12,7 +13,8 @@ export function getEodData(symbols: string) {
             url: `${MarketStack.API_ENDPOINT}/v1/eod`,
             qs: {
                 access_key: MarketStack.API_KEY,
-                symbols
+                symbols,
+                limit
             }
         }, (err: Error, res: any, body: string) => {
             /*
