@@ -19,7 +19,7 @@ const commonConfig = {
 
 const handlers = [
   {
-    entry: path.resolve(__dirname, './src/line-web-hook/index.ts'),
+    entry: path.resolve(__dirname, './src/functions/line-webhook.ts'),
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'terraform/functions/line-web-hook'),
@@ -27,7 +27,7 @@ const handlers = [
     },
   },
   {
-    entry: path.resolve(__dirname, './src/snp500/index.ts'),
+    entry: path.resolve(__dirname, './src/functions/snp500.ts'),
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'terraform/functions/snp500'),
@@ -35,13 +35,13 @@ const handlers = [
     },
   },
   {
-    entry: path.resolve(__dirname, './src/sqs-handler/index.ts'),
+    entry: path.resolve(__dirname, './src/functions/sqs-handler.ts'),
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'terraform/functions/sqs-handler'),
       libraryTarget: 'commonjs'
     },
-  }
+  },
 ];
 
 module.exports = handlers.map((handler) => Object.assign({}, commonConfig, handler));
