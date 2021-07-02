@@ -5,8 +5,8 @@ import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs.helper';
 import { UserHelper } from '../helpers/users.ddb.helper';
 import { AggregatedSignal, FSA, NotifyPayload, SqsEvent } from '../interfaces';
 import { LineConfiguration } from '../line-web-hook/constant';
-import * as MarketstackService from '../line-web-hook/services/marketstack.service';
-import { MARKETSTACK_API_LIMIT_RATE } from '../line-web-hook/services/marketstack.service';
+import * as MarketstackService from '../services/marketstack.service';
+import { MARKETSTACK_API_LIMIT_RATE } from '../services/marketstack.service';
 
 const { ma } = require('moving-averages');
 const MA_BAR = 200;

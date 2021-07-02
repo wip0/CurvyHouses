@@ -1,9 +1,9 @@
 import { S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import * as request from 'request';
-import { S3Helper } from '../../helpers/s3.helper';
-import { MarketStack } from '../constant';
-import { EodResponse } from '../interfaces';
-import { retrieveMockData } from '../utils/mock.utils';
+import { S3Helper } from '../helpers/s3.helper';
+import { MarketStack } from '../line-web-hook/constant';
+import { EodResponse } from '../line-web-hook/interfaces';
+import { retrieveMockData } from '../line-web-hook/utils/mock.utils';
 
 export const MARKETSTACK_API_LIMIT_RATE = 5;
 

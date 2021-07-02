@@ -4,7 +4,7 @@ import { Client, FollowEvent, MessageEvent, UnfollowEvent, WebhookEvent } from '
 import { LineConfiguration } from '../constant';
 import * as LineUtils from '../utils/line.utils';
 import * as MessageUtils from '../utils/message.utils';
-import * as MarketstackService from './marketstack.service';
+import * as MarketstackService from '../../services/marketstack.service';
 
 const ddbClient = new DynamoDBClient({});
 
