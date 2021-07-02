@@ -12,9 +12,10 @@ const client = new Client(LineConfiguration);
 const { ma } = require('moving-averages');
 const MA_DEFAULT_BAR = 5;
 
-const actionMap = new Map<string, (command: string, params: any[], replyToken: string) => Promise<void>>();
+const actionMap = new Map<string, (command: string, params: any[], replyToken: string, userId?: string) => Promise<void>>();
 actionMap.set('show', replySymbolDataHandler);
 actionMap.set('showfull', replySymbolDataHandler);
+actionMap.set('subscribe', replySubscriptionSetHandler);
 actionMap.set('-', logNonCommandHandler);
 
 
@@ -40,8 +41,9 @@ async function processFollowEvent(event: FollowEvent): Promise<void> {
     const userProfile = await client.getProfile(userId);
     const { displayName } = userProfile;
     const item = {
-        pk: userId,
-        sk: `user:${userId}`,
+        pk: 'user',
+        sk: userId,
+        userId,
         displayName,
         isFollow: true,
     };
@@ -60,12 +62,9 @@ async function processUnfollowEvent(event: UnfollowEvent): Promise<void> {
         console.log('Skip non-user unfollowing');
         return;
     }
-    const getItemParams = {
-        TableName: process.env.CURVYHOUSES_TABLE,
-    }
     const key = {
-        pk: userId,
-        sk: `user:${userId}`,
+        pk: 'user',
+        sk: userId,
     };
     const expressionAttributeValues = {
         ':isFollow': false,
@@ -84,7 +83,8 @@ async function processUnfollowEvent(event: UnfollowEvent): Promise<void> {
 }
 
 async function processsMessageEvent(event: MessageEvent): Promise<void> {
-    const { replyToken, message } = event;
+    const { replyToken, message, source } = event;
+    const { userId } = source;
     if (!LineUtils.isTextEventMessage(message)) {
         return;
     }
@@ -96,7 +96,7 @@ async function processsMessageEvent(event: MessageEvent): Promise<void> {
         await client.replyMessage(replyToken, MessageUtils.buildTextMessage('Invalid command'));
         return;
     }
-    await actionHandler(action, params, replyToken);
+    await actionHandler(action, params, replyToken, userId);
 }
 
 function getActionPayload(message: string): { action: string, params: any[] } {
@@ -123,4 +123,40 @@ async function replySymbolDataHandler(command: string, params: any[], replyToken
     const { open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, date } = data[data.length - 1];
     const replyMessage = MessageUtils.buildEodFlexMessage(symbol, new Date(date), open, close, high, low, volume, adj_open, adj_close, adj_high, adj_low, closeMa, command === 'showfull');
     await client.replyMessage(replyToken, replyMessage);
+}
+
+
+/*
+    #SUBSCRIBE ON|OFF
+*/
+async function replySubscriptionSetHandler(command: string, params: any, replyToken: string, userId?: string): Promise<void> {
+    if (!userId) {
+        console.log('No user id');
+        return;
+    }
+    const notifyFlag = params[0].toUpperCase();
+    if (!['ON', 'OFF'].includes(notifyFlag)) {
+        await client.replyMessage(replyToken, MessageUtils.buildTextMessage('Invalid flag - #SUBSCRIBE [ON|OFF]'));
+        return;
+    }
+    const isSubscribed = notifyFlag === 'ON';
+    const key = {
+        pk: 'user',
+        sk: userId,
+    };
+    const expressionAttributeValues = {
+        ':isSubscribed': String(isSubscribed),
+    }
+    const updateItemParams = {
+        TableName: process.env.CURVYHOUSES_TABLE,
+        Key: marshall(key),
+        UpdateExpression: 'SET #isSubscribed = :isSubscribed',
+        ExpressionAttributeNames: {
+            '#isSubscribed': 'isSubscribed'
+        },
+        ExpressionAttributeValues: marshall(expressionAttributeValues),
+    };
+
+    const data = await ddbClient.send(new UpdateItemCommand(updateItemParams));
+    await client.replyMessage(replyToken, MessageUtils.buildTextMessage(`Turn ${notifyFlag.toLowerCase()} subscription`));
 }

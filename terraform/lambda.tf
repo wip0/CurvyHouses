@@ -12,8 +12,16 @@ data "aws_iam_policy_document" "AWSLambdaTrustPolicy" {
 
 data "aws_iam_policy_document" "lambda_inline_policy" {
   statement {
-    actions = ["dynamodb:*"]
-    resources = ["arn:aws:dynamodb:*:*:table/curvyhouses*"]
+    actions = ["dynamodb:*"] // need to be reviewed
+    resources = ["arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.curvyhouses_ddb.name}*"]
+  }
+  statement {
+    actions = ["s3:*"] // need to be reviewed
+    resources = ["${aws_s3_bucket.curvyhouses_s3bucket.arn}/*"]
+  }
+  statement {
+    actions = ["sqs:*"] // need to be reviewed
+    resources = [aws_sqs_queue.curvyhouses_notify_queue.arn]
   }
 }
 
@@ -57,6 +65,7 @@ resource "aws_lambda_function" "curvy_lambda_line_hook" {
       MARKETSTACK_ENABLE = var.marketstack_enable
       AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
       CURVYHOUSES_TABLE = aws_dynamodb_table.curvyhouses_ddb.name
+      CURVYHOUSES_BUCKET = aws_s3_bucket.curvyhouses_s3bucket.id
     }
   }
 
@@ -68,16 +77,16 @@ resource "aws_lambda_function" "curvy_lambda_line_hook" {
 data "archive_file" "curvyhouses_snp500_daily_run_handler" {
     type        = "zip"
     source_dir  = "functions/snp500"
-    output_path = "snp500_daily_run.zip"
+    output_path = "snp500_daily_run_handler.zip"
 }
 
 resource "aws_lambda_function" "curvy_lambda_snp500_daily_run" {
-  filename          = "snp500_daily_run.zip"
+  filename          = "snp500_daily_run_handler.zip"
   function_name     = "curvy_lambda_snp500_daily_run"
   handler           = "index.handler"
   role             = aws_iam_role.curvyhouses_lambda_role.arn
   runtime           = "nodejs14.x" # need to review
-  timeout           = 30
+  timeout           = 120
   source_code_hash = data.archive_file.curvyhouses_snp500_daily_run_handler.output_base64sha256
   
   environment {
@@ -89,6 +98,9 @@ resource "aws_lambda_function" "curvy_lambda_snp500_daily_run" {
       MARKETSTACK_ENABLE = var.marketstack_enable
       AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
       CURVYHOUSES_TABLE = aws_dynamodb_table.curvyhouses_ddb.name
+      CURVYHOUSES_BUCKET = aws_s3_bucket.curvyhouses_s3bucket.id
+      MAX_SYMBOLS = var.max_symbols
+      CURVYHOUSES_QUEUE_URL = aws_sqs_queue.curvyhouses_notify_queue.id
     }
   }
 
@@ -103,4 +115,47 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call" {
     function_name = aws_lambda_function.curvy_lambda_snp500_daily_run.function_name
     principal = "events.amazonaws.com"
     source_arn = aws_cloudwatch_event_rule.daily_cron.arn
+}
+
+data "archive_file" "curvyhouses_sqs_handler" {
+    type        = "zip"
+    source_dir  = "functions/sqs-handler"
+    output_path = "sqs_handler.zip"
+}
+
+resource "aws_lambda_function" "curvy_lambda_sqs_handler" {
+  filename          = "sqs_handler.zip"
+  function_name     = "curvy_lambda_sqs_handler"
+  handler           = "index.handler"
+  role             = aws_iam_role.curvyhouses_lambda_role.arn
+  runtime           = "nodejs14.x" # need to review
+  timeout           = 120
+  source_code_hash = data.archive_file.curvyhouses_sqs_handler.output_base64sha256
+  reserved_concurrent_executions = 1
+  
+  environment {
+    variables = {
+      LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
+      LINE_CHANNEL_SECRET = var.line_channel_secret
+      MARKETSTACK_API_KEY = var.marketstack_api_key
+      MARKETSTACK_ENDPOINT = var.marketstack_endpoint
+      MARKETSTACK_ENABLE = var.marketstack_enable
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED = 1
+      CURVYHOUSES_TABLE = aws_dynamodb_table.curvyhouses_ddb.name
+      CURVYHOUSES_BUCKET = aws_s3_bucket.curvyhouses_s3bucket.id
+      MAX_SYMBOLS = var.max_symbols
+      CURVYHOUSES_QUEUE_URL = aws_sqs_queue.curvyhouses_notify_queue.id
+    }
+  }
+
+  tags = {
+    Name = var.stack_tag_name
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "curvy_lambda_sqs_event_source" {
+  event_source_arn = aws_sqs_queue.curvyhouses_notify_queue.arn
+  function_name    = aws_lambda_function.curvy_lambda_sqs_handler.arn
+  enabled          = true
+  batch_size       = 1
 }

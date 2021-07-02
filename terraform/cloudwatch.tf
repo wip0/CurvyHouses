@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "daily_cron" {
   name        = "daily_cron_trigger"
   description = "For triggering snp500 function daily"
-  schedule_expression = "cron(0 0 * * ? *)" # run at 00:00 (UTC) everyday
+  schedule_expression = "cron(0 1 * * ? *)" # run at 00:00 (UTC) everyday
 }
 
 resource "aws_cloudwatch_event_target" "lambda_daily_run" {

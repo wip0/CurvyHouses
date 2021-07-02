@@ -54,3 +54,9 @@ variable "marketstack_enable" {
   description = "Enable to use marketstack"
   type = bool
 }
+
+variable "max_symbols" {
+  description = "specify max S&P 500 symbols for notify to the user"
+  type        = number
+  default     = 2
+}

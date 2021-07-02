@@ -33,6 +33,14 @@ const handlers = [
       path: path.resolve(__dirname, 'terraform/functions/snp500'),
       libraryTarget: 'commonjs'
     },
+  },
+  {
+    entry: path.resolve(__dirname, './src/sqs-handler/index.ts'),
+    output: {
+      filename: 'index.js',
+      path: path.resolve(__dirname, 'terraform/functions/sqs-handler'),
+      libraryTarget: 'commonjs'
+    },
   }
 ];
 
