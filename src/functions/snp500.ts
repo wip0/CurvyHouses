@@ -1,8 +1,8 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
-import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs.helper';
+import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs';
 import { CloudwatchEvent, FSA, NotifyPayload } from '../interfaces';
 import { MarketStack } from '../line-web-hook/constant';
-import { scrapeSnP500List } from "../utils/snp-scraper.utils";
+import { scrapeSnP500List } from "../utils/snp-scraper";
 
 const MAX_PROCESS_SYMBOL = process.env.MAX_SYMBOLS ? Number(process.env.MAX_SYMBOLS) : undefined;
 

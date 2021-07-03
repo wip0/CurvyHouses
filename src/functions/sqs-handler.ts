@@ -1,12 +1,13 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { S3Client } from '@aws-sdk/client-s3';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { Client } from '@line/bot-sdk';
-import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs.helper';
-import { UserHelper } from '../helpers/users.ddb.helper';
+import { S3Helper } from '../helpers/s3';
+import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs';
+import { UserHelper } from '../helpers/user.ddb';
 import { AggregatedSignal, FSA, NotifyPayload, SqsEvent } from '../interfaces';
 import { LineConfiguration } from '../line-web-hook/constant';
-import * as MarketstackService from '../services/marketstack.service';
-import { MARKETSTACK_API_LIMIT_RATE } from '../services/marketstack.service';
+import { MarketstackService, MARKETSTACK_API_LIMIT_RATE } from '../services/marketstack';
 
 const { ma } = require('moving-averages');
 const MA_BAR = 200;
@@ -18,6 +19,7 @@ export class SqsHandler {
         private userHelper: UserHelper,
         private sqsHelper: SqsHelper,
         private lineClient: Client,
+        private marketStackService: MarketstackService,
     ) {
         this.actionMap.set('NOTIFY', this.processNotifyEvent.bind(this));
     }
@@ -78,7 +80,7 @@ export class SqsHandler {
 
         const processList = symbols.splice(0, MARKETSTACK_API_LIMIT_RATE);
         const signalPromises = processList.map(async (symbol) => {
-            const eodResponse = await MarketstackService.getEodData(symbol, MA_BAR + 1);
+            const eodResponse = await this.marketStackService.getEodData(symbol, MA_BAR + 1);
             const data = eodResponse.data.sort((eod1, eod2) => new Date(eod1.date).getTime() > new Date(eod2.date).getTime() ? 1 : -1);
             const closeData = data.map(item => item.close)
             const closeMas = ma(closeData, MA_BAR);
@@ -126,14 +128,18 @@ export class SqsHandler {
 }
 
 function buildHandler(): SqsHandler {
+    const s3Client = new S3Client({});
     const sqsClient = new SQSClient({ region: process.env.AWS_REGION});
     const ddbClient = new DynamoDBClient({});
     const lineClient = new Client(LineConfiguration);
 
     const sqsHelper = new SqsHelper(sqsClient);
+    const s3Helper = new S3Helper(s3Client);
     const userHelper = new UserHelper(ddbClient);
 
-    const sqsHandler = new SqsHandler(userHelper, sqsHelper, lineClient);
+    const marketStackService = new MarketstackService(s3Helper);
+
+    const sqsHandler = new SqsHandler(userHelper, sqsHelper, lineClient, marketStackService);
     return sqsHandler;
 }
 

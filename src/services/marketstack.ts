@@ -1,9 +1,10 @@
 import { S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import * as request from 'request';
-import { S3Helper } from '../helpers/s3.helper';
+import { Response } from 'request';
+import { S3Helper } from '../helpers/s3';
 import { MarketStack } from '../line-web-hook/constant';
 import { EodResponse } from '../line-web-hook/interfaces';
-import { retrieveMockData } from '../line-web-hook/utils/mock.utils';
+import { retrieveMockData } from '../line-web-hook/utils/mock';
 
 export const MARKETSTACK_API_LIMIT_RATE = 5;
 
@@ -39,7 +40,7 @@ export class MarketstackService {
                     symbols,
                     limit
                 }
-            }, async (err: Error, res: any, body: string) => {
+            }, async (err: Error, res: Response, body: string) => {
                 /*
                     # 422 Unprocessable Entity - On passing invalid symbol - This also be count in API usage
                     {
@@ -63,6 +64,7 @@ export class MarketstackService {
                     reject(err);
                 }
 
+                // NOTE: need to check response header
                 await this.s3Helper.putS3Object(s3Key, body)
                 const payload = JSON.parse(body) as EodResponse;
                 resolve(payload);

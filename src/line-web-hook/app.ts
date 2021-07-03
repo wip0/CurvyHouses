@@ -4,7 +4,7 @@ import * as express from 'express';
 import { NextFunction, Request, Response } from 'express';
 import { bodylogMiddleware } from './middlewares/line-bodylog';
 import { signatureValidationMiddleware } from './middlewares/line-signature-validation';
-import * as CurvyhousesService from './services/curvyhouses.service';
+import * as CurvyhousesService from './services/curvyhouses';
 
 export const app = express();
 

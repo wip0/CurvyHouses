@@ -2,9 +2,9 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 import { DynamoDBClient, PutItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { Client, FollowEvent, MessageEvent, UnfollowEvent, WebhookEvent } from '@line/bot-sdk';
 import { LineConfiguration } from '../constant';
-import * as LineUtils from '../utils/line.utils';
-import * as MessageUtils from '../utils/message.utils';
-import * as MarketstackService from '../../services/marketstack.service';
+import * as LineUtils from '../utils/line';
+import * as MessageUtils from '../utils/message';
+import * as MarketstackService from '../../services/marketstack';
 
 const ddbClient = new DynamoDBClient({});
 
