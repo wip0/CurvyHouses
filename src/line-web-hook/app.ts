@@ -1,12 +1,21 @@
-import { JSONParseError, SignatureValidationFailed, WebhookRequestBody } from '@line/bot-sdk';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { Client, JSONParseError, SignatureValidationFailed, WebhookRequestBody } from '@line/bot-sdk';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { NextFunction, Request, Response } from 'express';
+import { UserHelper } from '../helpers/user.ddb';
+import { LineConfiguration } from './constant';
 import { bodylogMiddleware } from './middlewares/line-bodylog';
 import { signatureValidationMiddleware } from './middlewares/line-signature-validation';
-import * as CurvyhousesService from './services/curvyhouses';
+import { CurvyHousesService } from './services/curvyhouses';
 
 export const app = express();
+const lineClient = new Client(LineConfiguration);
+const ddbClient = new DynamoDBClient({});
+
+const userHelper = new UserHelper(ddbClient);
+
+const curvyHousesService = new CurvyHousesService(lineClient, userHelper);
 
 app.use('/webhook/line', signatureValidationMiddleware); // this middleware should apply first
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -25,7 +34,7 @@ app.get('/', function(req, res) {
 app.post('/webhook/line', async(req: Request<any, any, WebhookRequestBody, any, Record<string, any>>, res) => {
   const body = req.body;
   const { events } = body;
-  const processPromises = events.map(CurvyhousesService.processEvent);
+  const processPromises = events.map(curvyHousesService.processEvent);
   await Promise.all(processPromises);
   res.sendStatus(200);
 });
