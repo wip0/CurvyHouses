@@ -16,10 +16,16 @@ export class CurvyHousesService {
         private lineClient: Client,
         private userHelper: UserHelper,
     ) {
-        this.messageActionMap.set('show', this.doShowSymbolDataCommand.bind(this));
-        this.messageActionMap.set('showfull', this.doShowSymbolDataCommand.bind(this));
-        this.messageActionMap.set('subscribe', this.doSetSubscriptionCommand.bind(this));
-        this.messageActionMap.set('-', this.logNonCommandHandler.bind(this));
+        this.processEvent = this.processEvent.bind(this);
+        this.doShowSymbolDataCommand = this.doShowSymbolDataCommand.bind(this);
+        this.doShowSymbolDataCommand = this.doShowSymbolDataCommand.bind(this);
+        this.doSetSubscriptionCommand = this.doSetSubscriptionCommand.bind(this);
+        this.logNonCommandHandler = this.logNonCommandHandler.bind(this);
+
+        this.messageActionMap.set('show', this.doShowSymbolDataCommand);
+        this.messageActionMap.set('showfull', this.doShowSymbolDataCommand);
+        this.messageActionMap.set('subscribe', this.doSetSubscriptionCommand);
+        this.messageActionMap.set('-', this.logNonCommandHandler);
     }
 
     public processEvent(event: WebhookEvent): Promise<void> {
