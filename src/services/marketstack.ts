@@ -65,16 +65,10 @@ export class MarketstackService {
                 }
 
                 // NOTE: need to check response header
-                await this.s3Helper.putS3Object(s3Key, body)
+                await this.s3Helper.putS3Object(s3Key, body);
                 const payload = JSON.parse(body) as EodResponse;
                 resolve(payload);
             });
         });
     }
 }
-
-const s3Client = new S3Client({});
-const s3Helper = new S3Helper(s3Client);
-
-const service = new MarketstackService(s3Helper);
-export const getEodData = service.getEodData.bind(service);

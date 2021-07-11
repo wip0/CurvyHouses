@@ -1,9 +1,12 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { S3Client } from '@aws-sdk/client-s3';
 import { Client, JSONParseError, SignatureValidationFailed, WebhookRequestBody } from '@line/bot-sdk';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { NextFunction, Request, Response } from 'express';
+import { S3Helper } from '../helpers/s3';
 import { UserHelper } from '../helpers/user.ddb';
+import { MarketstackService } from '../services/marketstack';
 import { LineConfiguration } from './constant';
 import { bodylogMiddleware } from './middlewares/line-bodylog';
 import { signatureValidationMiddleware } from './middlewares/line-signature-validation';
@@ -14,8 +17,11 @@ const lineClient = new Client(LineConfiguration);
 const ddbClient = new DynamoDBClient({});
 
 const userHelper = new UserHelper(ddbClient);
+const s3Client = new S3Client({});
+const s3Helper = new S3Helper(s3Client);
+const marketstackService = new MarketstackService(s3Helper);
 
-const curvyHousesService = new CurvyHousesService(lineClient, userHelper);
+const curvyHousesService = new CurvyHousesService(lineClient, userHelper, marketstackService);
 
 app.use('/webhook/line', signatureValidationMiddleware); // this middleware should apply first
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -29,7 +35,7 @@ app.get('/', function(req, res) {
     },
   };
   res.json(result);
-})
+});
 
 app.post('/webhook/line', async(req: Request<any, any, WebhookRequestBody, any, Record<string, any>>, res) => {
   const body = req.body;
