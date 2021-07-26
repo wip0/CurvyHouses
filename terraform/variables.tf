@@ -40,6 +40,11 @@ variable "line_channel_secret" {
   type        = string
 }
 
+variable "polygon_api_key" {
+  description = "Polygon api key - for checking daily open/close"
+  type        = string
+}
+
 variable "marketstack_endpoint" {
   description = "Marketstack endpoint"
   type        = string

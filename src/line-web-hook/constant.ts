@@ -22,3 +22,7 @@ export const MarketStack = {
     API_KEYS: process.env.MARKETSTACK_API_KEYS?.split(',') ?? [] as string[],
     ENABLE: process.env.MARKETSTACK_ENABLE === 'true'
 };
+
+export const Polygon = {
+    POLYGON_API_KEY: process.env.POLYGON_API_KEY as string,
+}

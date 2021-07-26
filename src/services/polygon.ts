@@ -1,19 +1,18 @@
 import * as request from 'request';
 import { Response } from 'request';
+import { Polygon } from '../line-web-hook/constant';
 import { PolygonDailyOpenCloseResponse } from '../line-web-hook/interfaces';
 
 export class PolygonService {
     public checkMarketOpen(symbol: string, date: Date): Promise<boolean> {
         const formattedDate = this.formatDate(date);
-        const adjust = true;
-        const apiKey = '6qcwubDE8G399eS9lvkMUTZ1i_a6X84Q';
         return new Promise<boolean>((resolve, reject) => {
             request.get(
                 `http://api.polygon.io/v1/open-close/${symbol}/${formattedDate}`,
                 {
                     qs: {
-                        adjust,
-                        apiKey,
+                        adjust: true,
+                        apiKey: Polygon.POLYGON_API_KEY,
                     }
                 }, async (err: any, response: Response, body: any) => {
                     if (err) {

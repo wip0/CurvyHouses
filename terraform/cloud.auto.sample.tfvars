@@ -6,4 +6,5 @@ line_channel_access_token = ""
 line_channel_secret = ""
 marketstack_endpoint = ""
 marketstack_api_keys = "" # e.g. apikey1,apikey2
+polygon_api_key = "" # single api key
 marketstack_enable = "false"

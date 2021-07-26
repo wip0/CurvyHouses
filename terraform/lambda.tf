@@ -60,6 +60,7 @@ resource "aws_lambda_function" "curvy_lambda_line_hook" {
     variables = {
       LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
       LINE_CHANNEL_SECRET = var.line_channel_secret
+      POLYGON_API_KEY = var.polygon_api_key
       MARKETSTACK_API_KEYS = var.marketstack_api_keys
       MARKETSTACK_ENDPOINT = var.marketstack_endpoint
       MARKETSTACK_ENABLE = var.marketstack_enable
@@ -93,6 +94,7 @@ resource "aws_lambda_function" "curvy_lambda_snp500_daily_run" {
     variables = {
       LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
       LINE_CHANNEL_SECRET = var.line_channel_secret
+      POLYGON_API_KEY = var.polygon_api_key
       MARKETSTACK_API_KEYS = var.marketstack_api_keys
       MARKETSTACK_ENDPOINT = var.marketstack_endpoint
       MARKETSTACK_ENABLE = var.marketstack_enable
@@ -137,6 +139,7 @@ resource "aws_lambda_function" "curvy_lambda_sqs_handler" {
     variables = {
       LINE_CHANNEL_ACCESS_TOKEN = var.line_channel_access_token
       LINE_CHANNEL_SECRET = var.line_channel_secret
+      POLYGON_API_KEY = var.polygon_api_key
       MARKETSTACK_API_KEYS = var.marketstack_api_keys
       MARKETSTACK_ENDPOINT = var.marketstack_endpoint
       MARKETSTACK_ENABLE = var.marketstack_enable
