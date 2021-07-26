@@ -23,7 +23,7 @@ export class SNP500Handler {
         }
         const snp500List = await scrapeSnP500List();
         const symbolList = snp500List.slice(0, MAX_PROCESS_SYMBOL || snp500List.length);
-        const licenseList = ['0b6bcc2612696de970150a09fd1c558d', MarketStack.API_KEY];
+        const licenseList = MarketStack.API_KEYS;
         const sqsBody: FSA<NotifyPayload> = {
             type: 'NOTIFY',
             payload: {

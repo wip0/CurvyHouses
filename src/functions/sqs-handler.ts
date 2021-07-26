@@ -6,7 +6,7 @@ import { S3Helper } from '../helpers/s3';
 import { CURVYHOUSES_QUEUE_URL, SqsHelper } from '../helpers/sqs';
 import { UserHelper } from '../helpers/user.ddb';
 import { AggregatedSignal, FSA, NotifyPayload, SqsEvent } from '../interfaces';
-import { LineConfiguration, MarketStack } from '../line-web-hook/constant';
+import { LineConfiguration } from '../line-web-hook/constant';
 import { EodData, EodResponse } from '../line-web-hook/interfaces';
 import { isError, isUsageLimitReachedError } from '../line-web-hook/utils/utils';
 import { MarketStackResponseHeader, MarketstackService, MARKETSTACK_API_LIMIT_RATE } from '../services/marketstack';

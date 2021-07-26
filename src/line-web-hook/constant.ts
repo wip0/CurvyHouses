@@ -19,6 +19,6 @@ export const LineConfiguration = {
 
 export const MarketStack = {
     API_ENDPOINT: process.env.MARKETSTACK_ENDPOINT as string,
-    API_KEY: process.env.MARKETSTACK_API_KEY as string,
+    API_KEYS: process.env.MARKETSTACK_API_KEYS?.split(',') ?? [] as string[],
     ENABLE: process.env.MARKETSTACK_ENABLE === 'true'
 };

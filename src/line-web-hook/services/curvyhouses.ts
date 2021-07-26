@@ -107,7 +107,7 @@ export class CurvyHousesService {
     */
     private async doShowSymbolDataCommand(command: string, params: any[], replyToken: string): Promise<void> {
         const symbol = params[0];
-        const eodResult = await this.marketstackService.getEodData(symbol, MarketStack.API_KEY);
+        const eodResult = await this.marketstackService.getEodData(symbol, MarketStack.API_KEYS[MarketStack.API_KEYS.length - 1]);
         const eodResponse = eodResult.payload;
         const data = eodResponse.data.sort((eod1, eod2) => new Date(eod1.date).getTime() > new Date(eod2.date).getTime() ? 1 : -1);
         data.splice(0, data.length - MA_DEFAULT_BAR);

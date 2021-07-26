@@ -45,8 +45,8 @@ variable "marketstack_endpoint" {
   type        = string
 }
 
-variable "marketstack_api_key" {
-  description = "Marketstack api key"
+variable "marketstack_api_keys" {
+  description = "Marketstack api keys"
   type        = string
 }
 
