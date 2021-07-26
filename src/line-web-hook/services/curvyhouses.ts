@@ -1,6 +1,7 @@
 import { Client, FollowEvent, MessageEvent, UnfollowEvent, WebhookEvent } from '@line/bot-sdk';
 import { UserHelper } from '../../helpers/user.ddb';
 import { MarketstackService } from '../../services/marketstack';
+import { MarketStack } from '../constant';
 import * as LineUtils from '../utils/line';
 import * as MessageUtils from '../utils/message';
 
@@ -106,7 +107,8 @@ export class CurvyHousesService {
     */
     private async doShowSymbolDataCommand(command: string, params: any[], replyToken: string): Promise<void> {
         const symbol = params[0];
-        const eodResponse = await this.marketstackService.getEodData(symbol);
+        const eodResult = await this.marketstackService.getEodData(symbol, MarketStack.API_KEY);
+        const eodResponse = eodResult.payload;
         const data = eodResponse.data.sort((eod1, eod2) => new Date(eod1.date).getTime() > new Date(eod2.date).getTime() ? 1 : -1);
         data.splice(0, data.length - MA_DEFAULT_BAR);
         const closeMas = ma(data.map(item => item.close), MA_DEFAULT_BAR);

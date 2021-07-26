@@ -24,8 +24,22 @@ export interface EodData {
 
 export interface EodResponse {
     pagination: Pagination;
-    data: EodData[]
+    data: EodData[];
+    error?: any;
 }
+
+export interface PolygonDailyOpenCloseResponse {
+    status: 'OK' | 'NOT_FOUND';
+    // from: string;
+    // symbol: string;
+    // open: number;
+    // high: number;
+    // close: number;
+    // volumne: number;
+    // afterHours: number;
+    // preMarket: number;
+}
+
 export interface LineReqEvent {
     message: {
         text: string;

@@ -10,3 +10,11 @@ export function toReadableDate(date: Date): string {
     const yyyy = date.getFullYear();
     return `${dd}/${mm}/${yyyy}`;
 }
+
+export function isUsageLimitReachedError(response: any): boolean {
+    return response?.error?.code === 'usage_limit_reached';
+}
+
+export function isError(response: any): boolean {
+    return !!response?.error;
+}
